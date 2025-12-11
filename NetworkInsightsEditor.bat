@@ -1,1 +1,0 @@
-UnrealEditor.exe "%cd%\EMBER.uproject" -NetTrace=1 -Trace=Net
