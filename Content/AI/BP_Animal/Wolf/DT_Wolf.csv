@@ -1,0 +1,3 @@
+,Type,Montage,PlayRate
+1,Hitted,/Script/Engine.AnimMontage'/Game/AI/BP_Animal/Wolf/A_Wolf_Hit_back_Montage.A_Wolf_Hit_back_Montage',1
+2,Dead,/Script/Engine.AnimMontage'/Game/AI/BP_Animal/Wolf/A_Wolf_Death_Montage.A_Wolf_Death_Montage',1

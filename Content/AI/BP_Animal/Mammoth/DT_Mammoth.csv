@@ -1,0 +1,3 @@
+,Type,Montage,PlayRate
+1,Hitted,/Script/Engine.AnimMontage'/Game/AI/BP_Animal/Mammoth/A_Mammoth_Hit_Body_Back_Montage.A_Mammoth_Hit_Body_Back_Montage',1
+2,Dead,/Script/Engine.AnimMontage'/Game/AI/BP_Animal/Mammoth/A_Mammoth_death_Montage.A_Mammoth_death_Montage',1

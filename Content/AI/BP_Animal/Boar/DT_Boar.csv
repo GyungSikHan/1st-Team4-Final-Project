@@ -1,0 +1,3 @@
+,Type,Montage,PlayRate
+1,Hitted,/Script/Engine.AnimMontage'/Game/AI/BP_Animal/Boar/A_Boar_Hit_Body_Back_Montage.A_Boar_Hit_Body_Back_Montage',1
+2,Dead,/Script/Engine.AnimMontage'/Game/AI/BP_Animal/Boar/A_Boar_Death_Montage.A_Boar_Death_Montage',1

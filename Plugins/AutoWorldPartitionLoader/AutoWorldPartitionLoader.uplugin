@@ -1,0 +1,16 @@
+{
+    "FileVersion": 3,
+    "Version": 1,
+    "VersionName": "1.0",
+    "FriendlyName": "Auto World Partition Loader",
+    "Description": "Automatically loads all World Partition cells on editor startup.",
+    "Category": "Editor",
+    "EnabledByDefault": true,
+    "Modules": [
+        {
+            "Name": "AutoWorldPartitionLoader",
+            "Type": "Editor",
+            "LoadingPhase": "PostEngineInit"
+        }
+    ]
+}

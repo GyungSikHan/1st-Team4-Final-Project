@@ -1,0 +1,3 @@
+,Type,Montage,PlayRate
+1,Hitted,/Script/Engine.AnimMontage'/Game/AI/Boss/Griffon/AnimFolder/AM_Hit.AM_Hit',1
+2,Dead,/Script/Engine.AnimMontage'/Game/AI/Boss/Griffon/AnimFolder/AM_GriffonDeath.AM_GriffonDeath',1

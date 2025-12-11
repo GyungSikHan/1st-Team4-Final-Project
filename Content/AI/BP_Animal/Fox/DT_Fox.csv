@@ -1,0 +1,3 @@
+,Type,Montage,PlayRate
+1,Hitted,/Script/Engine.AnimMontage'/Game/AI/BP_Animal/Fox/AM_FoxHit.AM_FoxHit',1
+2,Dead,/Script/Engine.AnimMontage'/Game/AI/BP_Animal/Fox/AM_FoxDeath.AM_FoxDeath',1

@@ -1,0 +1,3 @@
+,Type,Montage,PlayRate
+1,Hitted,/Script/Engine.AnimMontage'/Game/AI/BP_Animal/Deer/AM_DeerHit.AM_DeerHit',1
+2,Dead,/Script/Engine.AnimMontage'/Game/AI/BP_Animal/Deer/AM_DeerDeath.AM_DeerDeath',1
