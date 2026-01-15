@@ -1,5 +1,3 @@
-프로젝트 소개,기간,  명수, 담당,트러블슈팅 
-
 - 시연 영상
 <p align="center">
   <a href="https://youtu.be/1DuNwBaC0Xg">
@@ -13,3 +11,5 @@
     <img src="image.png" width="1000">
   </a>
 </p>
+
+[기술서](https://gksrudtlr2.tistory.com/507)
