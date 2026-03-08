@@ -16,18 +16,18 @@
 - [🎮 포트폴리오 링크](#-포트폴리오-링크)
 - [🖼 In-Game Screenshot](#-in-game-screenshot)
 - [👨‍💻 My Key Contributions](#-my-key-contributions)
- 
 - [Troubleshooting](#troubleshooting)
-
 - [Retrospective (느낀점)](#retrospective-느낀점)
 
-
 # ⚡ 30초 요약 (TL;DR)
-- **SYMBIO**: Unreal Engine 5.5 기반 4인 팀 Survival Action 프로젝트로,
-- **핵심 구현**
-	
-- **가장 어려웠던 점 → 해결**
-  
+- **EMBER: The Eternal Blizzard**: Unreal Engine 5.5 기반 6인 팀 Survival Action 프로젝트
+- **내 핵심 구현**
+  - AI 전투 로직(Combat/Weapon/Damage/Sound) 설계 및 구현
+  - Main UI 에셋 연동(메인 메뉴 -> 게임 진입 흐름 연결)
+  - 플레이어 방어구 장착 시스템 구현(멀티 전환 대비 네트워크 동기화)
+- **가장 어려웠던 점 -> 해결**
+  - Dragon AI 공격 후 상태가 멈추는 문제를 `Task 완료 시점` 이슈로 분석
+  - BT Task를 `InProgress`로 유지하고 몽타주 종료 콜백에서 `FinishLatentTask`로 완료 처리
 - **바로 보기**
   - 📌 시스템 설명/코드 링크: 아래 `My Key Contributions` 섹션 참고
 
@@ -47,11 +47,11 @@
 
 # 📌 프로젝트 소개
 
-"**EMBER: The Eternal Blizzard**"는 언리얼 엔진 기반으로 제작된 Survival Action 게임으로, 얼어붙은 세상을 구하기 위해 몬스터를 물리치고 각종 몬스터를 잡으며 영혼의 불꽃을 찾아 모험을 떠나는 세계관을 담고 있습니다.
-플레이어는 추운 환경에서 살아남아 영혼의 불꽃으로 얼어붙은 세상을 구해야 합니다.
+"**EMBER: The Eternal Blizzard**"는 언리얼 엔진 기반으로 제작된 Survival Action 게임으로, 얼어붙은 세상을 구하기 위해 몬스터를 물리치고 영혼의 불꽃을 찾아 모험을 떠나는 세계관을 담고 있습니다.
+플레이어는 극한 환경에서 생존하며 전투, 탐험, 성장 루프를 반복해 목표를 달성합니다.
 
 # 🎮 게임 개발
-> 
+>
 > - **인원**: 6인
 > - **기간**: 25.05 ~ 25.07
 > - **목적**: 언리얼 엔진의 **Gameplay Framework**와 **Component 기반 구조**를 이해하고, C++과 Blueprint 기반으로 AI 구현 및 Main UI Template를 적용하여 게임 진입 흐름을 연결하는 것을 목표로 함.
@@ -83,148 +83,297 @@ https://www.notion.so/1-4-2246365cac3f816ab542fa9e75a4ac7e?source=copy_link
 # **👨‍💻 My Key Contributions**
 
 ## AI
+### ✔ 설계 의도
+- AI 전투를 `Combat / Weapon / Damage / Sound / Behavior`로 분리해 유지보수성과 확장성을 확보
+
 ### ✔ 구현 내용
-#### ↳ [AI Weapon](https://github.com/GyungSikHan/1st-Team4-Final-Project/blob/Dev/Source/EMBER/AI/AIWeapon/CAI_Weapon.cpp)
-##### ✔ 설계 의도
-  - AI의 공격 애니메이션 재생시 AI의 충돌체에 충돌하는 것이 아닌 좀더 정밀한 충돌을 위해 충돌체를 따로 만들어 충돌을 감지할때만 데미지를 전달하도록 구현  
+#### ↳ [AI Combat System](Source/EMBER/GameInfo/GameData.cpp)
+- 기본 공격 시스템: 공격 데이터에 몽타주를 넣으면 공통 경로에서 재생되도록 구현
+- 멀티 전환 대비: MontageSystemComponent에서 Server/NetMulticast 경로로 몽타주 동기화 처리
 
-
-#### [충돌체 생성](https://github.com/GyungSikHan/1st-Team4-Final-Project/blob/Dev/Source/EMBER/AI/AIWeapon/CAI_Weapon.cpp#L18-L55) 
-  - 여러개의 충돌체를 만들고, 공격을 하기 전 충돌을 하지 못하도록 예외처리를 하여 공격시에만 충돌할 수 있도록 함
-```c++
-void ACAI_Weapon::SpawnPlay_Implementation(ACharacter* InOwner)
+**관련 코드 1: [GameData.cpp](Source/EMBER/GameInfo/GameData.cpp)**
+```cpp
+void FAttackData::DoAction(ACharacter* InOwner)
 {
-	...
+    UMontageSystemComponent* montage = Cast<UMontageSystemComponent>(InOwner->GetComponentByClass(UMontageSystemComponent::StaticClass()));
+    if(montage == nullptr || Montages == nullptr)
+        return;
 
-	TArray<USceneComponent*> children;
-	Root->GetChildrenComponents(true, children);
-	for (USceneComponent* child : children)
-	{
-		UShapeComponent* shape = Cast<UShapeComponent>(child);
-		USphereComponent* sphere = Cast<USphereComponent>(child);
-		if(shape != nullptr)
-		{
-			shape->OnComponentBeginOverlap.AddDynamic(this,&ACAI_Weapon::OnComponentBeginOverlap);
-			shape->OnComponentEndOverlap.AddDynamic(this, &ACAI_Weapon::OnComponentEndOverlap);
-			Collisions.Add(child);
-		}
-		else if(sphere != nullptr)
-		{
-			shape->OnComponentBeginOverlap.AddDynamic(this, &ACAI_Weapon::OnComponentBeginOverlap);
-			shape->OnComponentEndOverlap.AddDynamic(this, &ACAI_Weapon::OnComponentEndOverlap);
-			Collisions.Add(child);
-		}
-	}
-	OffCollision();
+    montage->PlayMontage(Montages, PlayRate);
 }
 ```
-#### [충돌체 부착](https://github.com/GyungSikHan/1st-Team4-Final-Project/blob/Dev/Source/EMBER/AI/AIWeapon/CAI_Weapon.cpp#L98-L107)
-  - AI의 Skeleton에 심어둔 소켓의 이름과 만든 충돌체의 이름이 같을 때 해당 소켓에 충돌체를 붙임
-```c++
+설명: 공격 데이터에 설정된 몽타주가 동일 로직으로 실행되어 AI별 기본 공격 재사용이 가능해짐.
+
+**관련 코드 2: [BTT_DragonAttack.cpp](Source/EMBER/AI/Task/BTT_DragonAttack.cpp)**
+```cpp
+EBTNodeResult::Type UBTT_DragonAttack::ExecuteTask(UBehaviorTreeComponent& Comp, uint8* NodeMemory)
+{
+	DragonAnim->Montage_SetEndDelegate(EndDelegate, RangedAttackMontage);
+	return EBTNodeResult::InProgress;
+}
+```
+설명: BT Task를 `InProgress`로 유지하고 몽타주 종료 시점에 동기화해 공격 후 상태 멈춤을 방지.
+
+**관련 코드 3: [MontageSystemComponent.h](Source/EMBER/Component/MontageSystemComponent.h), [MontageSystemComponent.cpp](Source/EMBER/Component/MontageSystemComponent.cpp)**
+```cpp
+UFUNCTION(NetMulticast, Reliable)
+void MulticastPlayMontage(UAnimMontage* Montage,float PlayRate = 1.f,FName SectionName = NAME_None);
+
+UFUNCTION(Server, Reliable, WithValidation)
+void ServerPlayMontage(UAnimMontage* Montage, float PlayRate = 1.f, FName SectionName = NAME_None);
+```
+설명: 싱글 출시로 전환됐지만, 멀티 전환 대비로 서버 요청/멀티캐스트 동기화 경로를 준비.
+
+#### ↳ [AI Weapon](Source/EMBER/AI/AIWeapon/CAI_Weapon.cpp)
+
+**관련 코드 1: [CAI_Weapon.cpp](Source/EMBER/AI/AIWeapon/CAI_Weapon.cpp)**
+```cpp
+for (USceneComponent* child : children)
+{
+	UShapeComponent* shape = Cast<UShapeComponent>(child);
+	if(shape != nullptr)
+	{
+		shape->OnComponentBeginOverlap.AddDynamic(this,&ACAI_Weapon::OnComponentBeginOverlap);
+		shape->OnComponentEndOverlap.AddDynamic(this, &ACAI_Weapon::OnComponentEndOverlap);
+		Collisions.Add(child);
+	}
+}
+OffCollision();
+```
+설명: 전용 충돌체를 동적으로 등록하고 기본값을 비활성화해 공격 구간에서만 판정되도록 구성.
+
+**관련 코드 2: [CAI_Weapon.h](Source/EMBER/AI/AIWeapon/CAI_Weapon.h), [CAI_Weapon.cpp](Source/EMBER/AI/AIWeapon/CAI_Weapon.cpp)**
+```cpp
+UFUNCTION(BlueprintCallable, Category = "Attach")
+void AttachTo(FName InSocketName);
+```
+```cpp
 void ACAI_Weapon::AttachTo(FName InSocketName)
 {
-	if(OwnerCharacter == nullptr)
-		return;
-	for (USceneComponent* collision : Collisions)
-	{
-		if(collision->GetName() == InSocketName.ToString())
-			collision->AttachToComponent(OwnerCharacter->GetMesh(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), InSocketName);
-	}
+	if(collision->GetName() == InSocketName.ToString())
+		collision->AttachToComponent(OwnerCharacter->GetMesh(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), InSocketName);
 }
 ```
+설명: 블루프린트에서 C++ Attach 함수를 호출해 소켓 부착을 제어할 수 있도록 연동.
 
-#### [충돌 처리](https://github.com/GyungSikHan/1st-Team4-Final-Project/blob/Dev/Source/EMBER/AI/AIWeapon/CAI_Weapon.cpp#L77-L96)
-- 공격을 하는 몽타주가 재생시 Collision을 키고 끌 수 있게 구현
-```c++
-void ACAI_Weapon::OnCollision()
+#### ↳ [AI Damage System](Source/EMBER/GameInfo/GameData.h)
+
+**관련 코드 1: [GameData.h](Source/EMBER/GameInfo/GameData.h)**
+```cpp
+USTRUCT(BlueprintType)
+struct FDamageData
 {
-	// UE_LOG(LogTemp, Warning, L"collision");
-	for (USceneComponent* collision : Collisions)
-	{
-		UPrimitiveComponent* coll = Cast<UPrimitiveComponent >(collision);
-		if (coll != nullptr)
-			coll->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	}
-}
+    UPROPERTY(EditAnywhere, BlueprintReadWrite) float Damage;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite) FEffectData HitEffect;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite) FSound2D HitSound;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite) TObjectPtr<UAnimMontage> Montages;
+    void SendDamage(ACharacter* InAttacker, AActor* InAttackCauser, ACharacter* InOther);
+};
+```
+설명: 데미지 값과 피격 연출 데이터를 GameData로 묶어 데이터 기반 밸런싱이 가능해짐.
 
-void ACAI_Weapon::OffCollision()
+**관련 코드 2: [GameData.cpp](Source/EMBER/GameInfo/GameData.cpp)**
+```cpp
+void FDamageData::SendDamage(ACharacter* InAttacker, AActor* InAttackCauser, ACharacter* InOther)
 {
-	for (USceneComponent* collision : Collisions)
-	{
-		UPrimitiveComponent* coll = Cast<UPrimitiveComponent >(collision);
-		if (coll != nullptr)
-			coll->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
+    if(InAttacker->HasAuthority() == false)
+        return;
+
+    FActionDamageEvent e;
+    e.DamageData = this;
+    InOther->TakeDamage(Damage, e, InAttacker->GetController(), InAttackCauser);
 }
 ```
+설명: 서버 권한에서만 데미지를 반영해 네트워크 환경에서 피해 적용 일관성을 유지.
 
-#### ↳ [AI Combat System]()
+**관련 코드 2-1: [BaseAI.h](Source/EMBER/AI/Base/BaseAI.h), [BaseAI.cpp](Source/EMBER/AI/Base/BaseAI.cpp)**
+```cpp
+UPROPERTY(ReplicatedUsing = "OnRep_Hitted")
+FDamagesData DamageData;
 
-```c++
+UFUNCTION(NetMulticast, Reliable)
+void MulticastHitted(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 
+DOREPLIFETIME(ABaseAI, DamageData);
 ```
+설명: 데미지 적용 후 피격 데이터 복제/멀티캐스트로 상태 반영 경로를 구성(멀티 전환 대비).
 
+**관련 코드 3: [CAI_Weapon.cpp](Source/EMBER/AI/AIWeapon/CAI_Weapon.cpp)**
+```cpp
+Hitted.AddUnique(other);
+HitDatas[CurrAttackIndex].SendDamage(OwnerCharacter, this, other);
+```
+설명: 중복 타격 방지 후 공격 인덱스별 데미지 데이터를 적용.
 
-#### ↳ [AI Damage System]()
-#### ↳ [AI 구조 개선]()
-#### ↳ [AI Sound System]()
+#### ↳ [AI Sound System](Source/EMBER/AI/Notify/CAnimNotify_AISound.cpp)
 
-## 방어구 장착 시스템 구현
+**관련 코드 1: [CAnimNotify_AISound.cpp](Source/EMBER/AI/Notify/CAnimNotify_AISound.cpp)**
+```cpp
+void UCAnimNotify_AISound::Notify(...)
+{
+	TObjectPtr<ABaseAI> ai = Cast<ABaseAI>(MeshComp->GetOwner());
+	if (ai == nullptr) return;
+	ai->PlaySound(SoundType);
+}
+```
+설명: Anim Notify에서 SoundType을 전달해 AI 상태/행동별 사운드를 분기.
+
+**관련 코드 2: [BaseAI.cpp](Source/EMBER/AI/Base/BaseAI.cpp)**
+```cpp
+UGameplayStatics::SpawnSoundAtLocation(
+	GetWorld(), AISounds[(int32)InSoundType], GetActorLocation(),
+	FRotator::ZeroRotator, 1.0f, 1.0f, 0.0f, SoundAttenuation
+);
+```
+설명: SoundAttenuation 기반 3D 사운드 재생으로, 맵 전체 재생 문제를 막고 거리 기반 감쇠를 적용.
+
+#### ↳ [AI 구조 개선](Source/EMBER/AI/Base/BaseAI.cpp)
+
+**관련 코드 1: [CAIController.cpp](Source/EMBER/AI/CAIController.cpp)**
+```cpp
+void ACAIController::OnPossess(APawn* InPawn)
+{
+	...
+	Behavior = Cast<UCBehaviorTreeComponent>(AI->GetComponentByClass(UCBehaviorTreeComponent::StaticClass()));
+	Behavior->SetBlackboard(Blackboard);
+	RunBehaviorTree(AI->GetBehaviorTree());
+}
+```
+설명: BaseAI에 섞여 있던 컨트롤러 책임(블랙보드/BT 실행)을 AIController로 분리해 역할을 명확히 정리.
+
+**관련 코드 2: [CBehaviorTreeComponent.cpp](Source/EMBER/AI/BehaviorTree/CBehaviorTreeComponent.cpp)**
+```cpp
+void UCBehaviorTreeComponent::SetBlackboard_Object(FName Keyname, UObject* Value)
+{
+	Blackboard->SetValueAsObject(Keyname, Value);
+}
+
+void UCBehaviorTreeComponent::SetBlackboard_Vector(FName Keyname, FVector Value)
+{
+	Blackboard->SetValueAsVector(Keyname, Value);
+}
+```
+설명: UCBehaviorTreeComponent를 만들어 BehaviorTree 블랙보드 키 값을 코드에서 일관되게 연동/제어.
+
+**관련 코드 3: [CBTService_Aggressive.cpp](Source/EMBER/AI/Service/CBTService_Aggressive.cpp), [CBTService_Defensive.cpp](Source/EMBER/AI/Service/CBTService_Defensive.cpp)**
+```cpp
+// Aggressive / Defensive Service 분리 운용
+```
+설명: 기존에 Service 계층이 없어 세밀한 조정이 어려워, 공격 성향별 Service를 추가해 더 정밀한 전투 판단 튜닝이 가능하도록 구성.
+## 플레이어 방어구 장착 시스템 구현
 ### ✔ 설계 의도
-- Component 기반 장비 장착 구조로 설계하여 기능을 재사용하기 쉽고, 분리, 조합하여 Actor를 가볍고 유연하게 만들기 위해 사용
-- Network 동기화 처리를 통해 멀티 환경에서도 동작할 수 있도록 구현
+- ArmorComponent를 통해 방어구 장착 기능을 분리하고, 멀티플레이 환경에서 장착 상태가 동일하게 보이도록 동기화하는 것을 목표로 구현
 
 ### ✔ 구현 내용
-#### ↳ []()
+#### ↳ [Armor/Equipment 네트워크 동기화](Source/EMBER/Component/ArmorComponent.cpp)
+
+**관련 코드 1: [ArmorComponent.cpp](Source/EMBER/Component/ArmorComponent.cpp)**
+```cpp
+UArmorComponent::UArmorComponent()
+{
+	SetIsReplicatedByDefault(true);
+}
+
+void UArmorComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(UArmorComponent, ArmorDataArray);
+}
+```
+설명: ArmorComponent를 직접 구현하고 리플리케이션을 설정해 방어구 데이터 동기화 기반을 구성.
+
+**관련 코드 2: [ArmorComponent.cpp](Source/EMBER/Component/ArmorComponent.cpp)**
+```cpp
+void UArmorComponent::OnRep_ArmorDataArray()
+{
+	UpdateArmorVisuals();
+}
+```
+설명: 장착 데이터가 복제되면 클라이언트에서 외형이 즉시 반영되도록 처리.
+
+**관련 코드 3: [ArmorComponent.cpp](Source/EMBER/Component/ArmorComponent.cpp)**
+```cpp
+void UArmorComponent::EquipORUnEquip_Implementation(USkeletalMesh* Mesh, EArmorType ArmorType, int32 ItemTemplateID)
+{
+	if (HasOwnerAuthority())
+	{
+		...
+		AddOrUpdateArmorData(ArmorType, ItemTemplateID, Mesh->GetPathName());
+	}
+}
+```
+설명: 서버 권한 기준으로 장착/해제 상태를 갱신하고, 복제 데이터에 반영해 네트워크 동기화를 보장.
 
 ## Main UI 구성 및 연동
 ### ✔ 설계 의도
-![alt text](image.png)
-- 구매한 에셋을 프로젝트에 적용시켜 Level Load 및 게임 진입 흐름 연결
+- 구매한 Main UI 에셋을 프로젝트 진입 흐름에 결합해 메인 메뉴 -> 게임 시작 동선을 구성
+
 ### ✔ 구현 내용
-#### ↳ []()
+#### ↳ [Main UI 에셋 적용 및 플로우 연결](Config/DefaultEngine.ini)
+- 프로젝트 기본 맵을 MainMenu 레벨로 설정해 실행 즉시 UI 진입
+- GameMode/GameInstance 연동으로 시작 흐름 일관화
+
+```ini
+[/Script/EngineSettings.GameMapsSettings]
+EditorStartupMap=/Game/ProMainMenuV3/Levels/LVL_MainMenu_Test.LVL_MainMenu_Test
+GameDefaultMap=/Game/ProMainMenuV3/Levels/LVL_MainMenu_Test.LVL_MainMenu_Test
+GameInstanceClass=/Script/EMBER.EmberGameInstance
+GlobalDefaultGameMode=/Game/GameMode/BP_EmberGameMode.BP_EmberGameMode_C
+```
+
+- 관련 에셋: [WB_MainMenu.uasset](Content/ProMainMenuV3/Widgets/WB_MainMenu.uasset)
 
 # **Troubleshooting**
 
 ### 1) 🎯 AI 공격 중 멈춤 현상
-- 문제: Dragon AI가 공격을 하고나서 Behavior Tree의 다음 행동을 하지 않는 버그 발생
-- 원인: DragonAttack의 ExecuteTask 함수에서 EBTNodeResult::Succeeded를 return하게 되면서 Montage안에 있던 AI Attack state를 Attack에서 Idle 상태로 돌아가지 못함
-- 해결: ExecuteTask 함수의 EBTNodeResult::InProgress를 리턴하고 OnMontageEnded 함수를 추가하여 몽타주가 끝나면 FinishLatentTask에 EBTNodeResult::Succeeded로 Task를 끝날 수 있게 하여 State를 Attack에서 Idle로 변경 가능하게 끔 구현
-[UBTT_DragonAttack](https://github.com/GyungSikHan/1st-Team4-Final-Project/blob/Dev/Source/EMBER/AI/Task/BTT_DragonAttack.cpp#L16-L73)
-```cpp
-UBTT_DragonAttack::UBTT_DragonAttack()
-{
-	NodeName = TEXT("DragonRangedAttack");
-	bNotifyTick = false;
-}
+- 문제: Dragon AI가 공격 후 Behavior Tree의 다음 행동을 수행하지 않고 멈춤
+- 원인: DragonAttack Task가 즉시 `Succeeded`를 반환해 몽타주 기반 상태 복귀 타이밍과 불일치
+- 해결: `ExecuteTask`는 `InProgress`를 반환하고 `OnMontageEnded`에서 `FinishLatentTask`로 종료 시점을 통일
+- 관련 코드: [BTT_DragonAttack.cpp](Source/EMBER/AI/Task/BTT_DragonAttack.cpp)
 
+```cpp
 EBTNodeResult::Type UBTT_DragonAttack::ExecuteTask(UBehaviorTreeComponent& Comp, uint8* NodeMemory)
 {
 	...
-	
 	return EBTNodeResult::InProgress;
 }
 
 void UBTT_DragonAttack::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
-{	
+{
 	if (!BTComp || bInterrupted)
 	{
 		FinishLatentTask(*BTComp, EBTNodeResult::Failed);
 		return;
 	}
 
-	//GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("FinishDragonAttackMontage")));
 	FinishLatentTask(*BTComp, EBTNodeResult::Succeeded);
 }
 ```
 
-### 2) 🎯 프로젝트 실행 시 프로젝트가 멈추는 문제 발생
-- 문제: 테스트를 위해 프로젝트 실행을 하면 프로젝트가 멈추고 종료도 안되는 문제 발생
-- 원인: Level에 너무 많은 Object들이 배치되어 리소스가 과하게 사용되는 문제 때문에 멈춤
-- 해결1: 환경 요소를 맵 전체가 아닌 플레이어가 갈 수 있는 위치에만 배치하여 효율적으로 맵을 구성
-- 해결2: AI가 과하게 배치되어 매 Tick마다 실행되는 Behavior Tree가 계속해서 리소르를 너무 많이 잡아먹어 Player 주변에 생성된 AI들만 Behavior Tree가 실행되도록 지시함
+### 2) 🎯 AI Sound가 맵 전체에서 들리는 문제
+- 문제: AI 사운드가 플레이어 거리와 무관하게 맵 전체에서 동일하게 들려 몰입감을 해침
+- 원인: 위치 기반 감쇠(Attenuation) 없이 사운드가 재생되어 청취 반경/볼륨 감쇠가 적용되지 않음
+- 해결: AI Sound System을 도입해 `SoundType` 기반 분기 + `SoundAttenuation` 적용으로 일정 거리 내에서만 들리고, 멀어질수록 볼륨이 감쇠되도록 개선
 
+```cpp
+void ABaseAI::PlaySound(AISoundCategory InSoundType)
+{
+	if (SoundAttenuation == nullptr)
+		return;
+	if (AISounds[(int32)InSoundType] == nullptr)
+		return;
+
+	UGameplayStatics::SpawnSoundAtLocation(
+		GetWorld(),
+		AISounds[(int32)InSoundType],
+		GetActorLocation(),
+		FRotator::ZeroRotator,
+		1.0f, 1.0f, 0.0f,
+		SoundAttenuation
+	);
+}
+```
 # **Retrospective (느낀점)**
-- AI를 리팩토링하는 과정에서 다른 사람의 코드를 읽고 파악하는 것의 중요성을 느끼게 되었음
-- 그렇지 않은 경우 같은 기능(예를 들면 AI가 공격을 하는 Task 개발)을 상위 클래스를 상속을 받아 만들거나 이미 만들어진 기능을 사용하는 것이 아닌 중복되는 기능을 만들게 되었으며, 문제가 생겼을 때 마다 어느 코드가 문제인지 파악하는데 어려움을 느끼게 되었음
-- 
+- AI 리팩토링 과정에서 "기능 추가 속도"보다 "책임 분리"가 팀 개발에서 더 큰 생산성을 만든다는 점을 체감함
+- “멀티 출시까지 이어지진 못했지만, 권한 체크/복제/RPC 경로를 미리 설계해 단일 기능도 확장 가능한 형태로 만들었고, ‘지금 필요한 구현’과 ‘다음 단계 확장성’을 함께 고려하는 개발 관점을 갖게 됨
+- “AI 전투/사운드/데미지 이슈를 해결하면서, 버그의 원인은 기능 자체보다 시스템 간 경계(몽타주-BT-상태)에서 자주 발생한다는 것을 체감했고,  문제 재현-원인 분리-검증 코드 추가 순서로 디버깅 프로세스를 정착시키려 노력하게됨
