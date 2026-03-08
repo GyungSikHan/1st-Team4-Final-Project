@@ -59,10 +59,12 @@
 </aside>
 
 # 🎮 포트폴리오 링크
-https://drive.google.com/file/d/1zo_iDcPDlLVG9eGryJzAW-Y4Bwr19yAZ/view?usp=sharing
+https://drive.google.com/file/d/1PpsPOJKj8707m6JqEeOPmhDDgPz4zifB/view?usp=sharing
 
-# 브로셔
+# 브로셔 및 PPT
 https://www.notion.so/1-4-2246365cac3f816ab542fa9e75a4ac7e?source=copy_link
+
+https://drive.google.com/file/d/1zo_iDcPDlLVG9eGryJzAW-Y4Bwr19yAZ/view?usp=sharing
 
 ## 🖼 In-Game Screenshot
 <table>
