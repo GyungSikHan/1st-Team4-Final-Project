@@ -7,18 +7,6 @@
 	</tr>
 </table>
 
-## 📌 Table of Contents
-
-- [⚡ 30초 요약 (TL;DR)](#-30초-요약-tldr)
-- [🎥 게임 플레이 영상](#-게임-플레이-영상)
-- [📌 프로젝트 소개](#-프로젝트-소개)
-- [🎮 게임 개발](#-게임-개발)
-- [🎮 포트폴리오 링크](#-포트폴리오-링크)
-- [🖼 In-Game Screenshot](#-in-game-screenshot)
-- [👨‍💻 My Key Contributions](#-my-key-contributions)
-- [Troubleshooting](#troubleshooting)
-- [Retrospective (느낀점)](#retrospective-느낀점)
-
 # ⚡ 30초 요약 (TL;DR)
 - **EMBER: The Eternal Blizzard**: Unreal Engine 5.5 기반 6인 팀 Survival Action 프로젝트
 - **내 핵심 구현**
