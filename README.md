@@ -144,6 +144,22 @@ HitDatas[CurrAttackIndex].SendDamage(OwnerCharacter, this, other);
 ```
 
 #### ↳ [AI Sound System](Source/EMBER/AI/Notify/CAnimNotify_AISound.cpp)
+
+<table>
+    <tr>
+        <td align="center">
+             <img src="Image/image8.png" width="1000"><br>
+			 Blueprint Sound System
+		</td>
+	</tr>
+	<tr>
+        <td align="center">
+             <img src="Image/image7.gif" width="1000"><br>
+			 AI Sound
+		</td>
+	</tr>
+</table>
+
 - Anim Notify에서 상황별 사운드 타입을 전달해 AI별 사운드 연출을 일관화
 
 ```cpp
@@ -168,6 +184,15 @@ void UCAnimNotify_AISound::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenc
 
 ### ✔ 구현 내용
 #### ↳ [Armor/Equipment 네트워크 동기화](Source/EMBER/Component/ArmorComponent.cpp)
+
+<table>
+    <tr>
+        <td align="center">
+             <img src="Image/image6.gif" width="1000"><br>
+			 방어구 장착
+		</td>
+</table>
+
 - 서버 권한으로 장비 상태를 갱신하고, `Replicated Array + OnRep`로 클라이언트 외형을 동기화
 
 ```cpp
