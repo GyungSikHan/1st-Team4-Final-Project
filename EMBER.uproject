@@ -1,87 +1,90 @@
 {
-	"FileVersion": 3,
-	"EngineAssociation": "5.5",
-	"Category": "",
-	"Description": "",
-	"Modules": [
-		{
-			"Name": "EMBER",
-			"Type": "Runtime",
-			"LoadingPhase": "Default",
-			"AdditionalDependencies": [
-				"Engine",
-				"AIModule",
-				"GameplayAbilities"
-			]
-		}
-	],
-	"Plugins": [
-		{
-			"Name": "ModelingToolsEditorMode",
-			"Enabled": true,
-			"TargetAllowList": [
-				"Editor"
-			]
-		},
-		{
-			"Name": "NiagaraFluids",
-			"Enabled": true
-		},
-		{
-			"Name": "GitSourceControl",
-			"Enabled": true
-		},
-		{
-			"Name": "GameplayAbilities",
-			"Enabled": true
-		},
-		{
-			"Name": "CommonUI",
-			"Enabled": true
-		},
-		{
-			"Name": "ModularGameplay",
-			"Enabled": true
-		},
-		{
-			"Name": "PCG",
-			"Enabled": true
-		},
-		{
-			"Name": "PCGExternalDataInterop",
-			"Enabled": true
-		},
-		{
-			"Name": "PCGGeometryScriptInterop",
-			"Enabled": true
-		},
-		{
-			"Name": "PCGNiagaraInterop",
-			"Enabled": true
-		},
-		{
-			"Name": "PCGWaterInterop",
-			"Enabled": true
-		},
-		{
-			"Name": "FieldSystemPlugin",
-			"Enabled": true
-		},
-		{
-			"Name": "ActorPalette",
-			"Enabled": true
-		},
-		{
-			"Name": "MovieRenderPipeline",
-			"Enabled": true
-		},
-		{
-			"Name": "AutoWorldPartitionLoader",
-			"Enabled": false
-		},
-		{
-			"Name": "WorldPartitionHLODUtilities",
-			"Enabled": false
-		}
-	]
+  "FileVersion": 3,
+  "EngineAssociation": "5.5",
+  "Category": "",
+  "Description": "",
+  "Modules": [
+    {
+      "Name": "EMBER",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    }
+  ],
+  "Plugins": [
+    {
+      "Name": "ModelingToolsEditorMode",
+      "Enabled": true
+    },
+    {
+      "Name": "NiagaraFluids",
+      "Enabled": true
+    },
+    {
+      "Name": "GitSourceControl",
+      "Enabled": true
+    },
+    {
+      "Name": "GameplayAbilities",
+      "Enabled": true
+    },
+    {
+      "Name": "CommonUI",
+      "Enabled": true
+    },
+    {
+      "Name": "ModularGameplay",
+      "Enabled": true
+    },
+    {
+      "Name": "PCG",
+      "Enabled": true
+    },
+    {
+      "Name": "PCGExternalDataInterop",
+      "Enabled": true
+    },
+    {
+      "Name": "PCGGeometryScriptInterop",
+      "Enabled": true
+    },
+    {
+      "Name": "PCGNiagaraInterop",
+      "Enabled": true
+    },
+    {
+      "Name": "PCGWaterInterop",
+      "Enabled": true
+    },
+    {
+      "Name": "FieldSystemPlugin",
+      "Enabled": true
+    },
+    {
+      "Name": "ActorPalette",
+      "Enabled": true
+    },
+    {
+      "Name": "MovieRenderPipeline",
+      "Enabled": true
+    },
+    {
+      "Name": "AutoWorldPartitionLoader",
+      "Enabled": false
+    },
+    {
+      "Name": "WorldPartitionHLODUtilities",
+      "Enabled": false
+    },
+    {
+      "Name": "VisualStudioTools",
+      "Enabled": true,
+      "SupportedTargetPlatforms": [
+        "Win64"
+      ]
+    }
+  ],
+  "TargetPlatforms": [],
+  "AdditionalRootDirectories": [],
+  "AdditionalPluginDirectories": [],
+  "EpicSampleNameHash": ""
 }
